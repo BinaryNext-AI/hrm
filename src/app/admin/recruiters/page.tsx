@@ -6,12 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   Mail, 
   Calendar, 
   UserCheck, 
   UserPlus,
+  Trash2,
   Plus,
   Loader2
 } from "lucide-react";
@@ -23,8 +25,10 @@ export default function RecruitersPage() {
   const [items, setItems] = useState<Array<{id:number,email:string,role:string,created_at?:string}>>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRecruiters, setSelectedRecruiters] = useState<number[]>([]);
 
   useEffect(() => {
     loadRecruiters();
@@ -67,6 +71,61 @@ export default function RecruitersPage() {
     }
   }
 
+  async function deleteSelectedRecruiters() {
+    if (selectedRecruiters.length === 0) {
+      toast.error("Please select at least one recruiter to delete");
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      // Find emails for selected recruiter IDs
+      const recruitersToDelete = items.filter(recruiter => selectedRecruiters.includes(recruiter.id));
+      
+      // Delete each selected recruiter
+      const deletePromises = recruitersToDelete.map(recruiter =>
+        fetch(`${API_BASE}/admin/delete_recruiter?email=${encodeURIComponent(recruiter.email)}`, {
+          method: "DELETE",
+        }).then(res => res.json())
+      );
+
+      const results = await Promise.all(deletePromises);
+      
+      const successCount = results.filter(data => data?.ok).length;
+      const failCount = results.length - successCount;
+
+      if (successCount > 0) {
+        toast.success(`${successCount} recruiter(s) deleted successfully!`);
+        setSelectedRecruiters([]); // Clear selection
+        await loadRecruiters(); // Refresh list
+      }
+      
+      if (failCount > 0) {
+        toast.error(`Failed to delete ${failCount} recruiter(s)`);
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting recruiters");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function toggleRecruiterSelection(recruiterId: number) {
+    setSelectedRecruiters(prev => 
+      prev.includes(recruiterId) 
+        ? prev.filter(id => id !== recruiterId)
+        : [...prev, recruiterId]
+    );
+  }
+
+  function toggleSelectAll() {
+    if (selectedRecruiters.length === items.length) {
+      setSelectedRecruiters([]);
+    } else {
+      setSelectedRecruiters(items.map(recruiter => recruiter.id));
+    }
+  }
+
   if (loading) {
     return (
       <div className="p-6">
@@ -89,14 +148,40 @@ export default function RecruitersPage() {
       {/* Stats Card */}
       <Card className="border-0 shadow-lg bg-white mb-8">
         <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-blue-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Total Recruiters</h3>
+                <p className="text-3xl font-bold text-blue-600">{items.length}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Total Recruiters</h3>
-              <p className="text-3xl font-bold text-blue-600">{items.length}</p>
-            </div>
+            {selectedRecruiters.length > 0 && (
+              <div className="flex items-center gap-4">
+                <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1">
+                  {selectedRecruiters.length} selected
+                </Badge>
+                <Button
+                  onClick={deleteSelectedRecruiters}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Selected ({selectedRecruiters.length})
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -158,14 +243,50 @@ export default function RecruitersPage() {
         </CardContent>
       </Card>
 
-      {/* Recruiters List */}
+      {/* Recruiters List with Selection */}
+      {items.length > 0 && (
+        <Card className="border-0 shadow-lg bg-white mb-4">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-slate-600" />
+                All Recruiters
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="select-all"
+                  checked={selectedRecruiters.length === items.length && items.length > 0}
+                  onCheckedChange={toggleSelectAll}
+                />
+                <Label htmlFor="select-all" className="cursor-pointer text-sm font-normal">
+                  Select All
+                </Label>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((recruiter) => (
-          <Card key={recruiter.id} className="border-0 shadow-lg bg-white hover:shadow-xl transition-shadow">
+          <Card 
+            key={recruiter.id} 
+            className={`border-0 shadow-lg bg-white hover:shadow-xl transition-all cursor-pointer ${
+              selectedRecruiters.includes(recruiter.id) ? 'ring-2 ring-blue-500' : ''
+            }`}
+            onClick={() => toggleRecruiterSelection(recruiter.id)}
+          >
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <UserCheck className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedRecruiters.includes(recruiter.id)}
+                    onCheckedChange={() => toggleRecruiterSelection(recruiter.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-blue-600" />
+                  </div>
                 </div>
                 <Badge className="bg-blue-100 text-blue-800">Active</Badge>
               </div>
@@ -215,5 +336,3 @@ export default function RecruitersPage() {
     </div>
   );
 }
-
-

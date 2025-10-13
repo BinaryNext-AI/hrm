@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { HelpCircle, Send, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { HelpCircle, Send, Clock, AlertTriangle, CheckCircle, Calendar } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
@@ -18,7 +18,8 @@ export default function SupportPage() {
         category: "",
         subject: "",
         description: "",
-        priority: "medium"
+        priority: "medium",
+        attendanceDate: ""
     });
 
     const categories = [
@@ -54,6 +55,11 @@ export default function SupportPage() {
                 priority: formData.priority
             });
 
+            // Add attendance_date only if category is attendance and date is selected
+            if (formData.category === 'attendance' && formData.attendanceDate) {
+                params.append('attendance_date', formData.attendanceDate);
+            }
+
             const response = await fetch(`${API_BASE}/support/tickets?${params.toString()}`, {
                 method: 'POST'
             });
@@ -66,7 +72,8 @@ export default function SupportPage() {
                     category: "",
                     subject: "",
                     description: "",
-                    priority: "medium"
+                    priority: "medium",
+                    attendanceDate: ""
                 });
             } else {
                 toast.error(result.message || "Failed to submit support ticket");
@@ -83,6 +90,27 @@ export default function SupportPage() {
             ...prev,
             [field]: value
         }));
+    };
+
+    const handleCategoryChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            category: value,
+            attendanceDate: "" // Reset date when category changes
+        }));
+    };
+
+    // Get max date (today)
+    const getMaxDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
+    // Get min date (30 days ago)
+    const getMinDate = () => {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return thirtyDaysAgo.toISOString().split('T')[0];
     };
 
     return (
@@ -114,7 +142,7 @@ export default function SupportPage() {
                                         <Label htmlFor="category" className="text-sm font-medium text-slate-700">
                                             Issue Category *
                                         </Label>
-                                        <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                                        <Select value={formData.category} onValueChange={handleCategoryChange}>
                                             <SelectTrigger className="w-full text-left h-14">
                                                 <SelectValue placeholder="Select the type of issue you're experiencing" />
                                             </SelectTrigger>
@@ -127,6 +155,29 @@ export default function SupportPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
+
+                                    {/* Attendance Date Field - Only show if category is attendance */}
+                                    {formData.category === 'attendance' && (
+                                        <div className="space-y-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <Label htmlFor="attendanceDate" className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                                                <Calendar className="h-4 w-4 text-blue-600" />
+                                                Attendance Date *
+                                            </Label>
+                                            <Input
+                                                id="attendanceDate"
+                                                type="date"
+                                                value={formData.attendanceDate}
+                                                onChange={(e) => handleInputChange('attendanceDate', e.target.value)}
+                                                min={getMinDate()}
+                                                max={getMaxDate()}
+                                                required
+                                                className="w-full h-14 text-base"
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                Select the date for which you need attendance support (within last 30 days)
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {/* Priority Selection */}
                                     <div className="space-y-3">
@@ -183,7 +234,7 @@ export default function SupportPage() {
                                     <div className="pt-4">
                                         <Button
                                             type="submit"
-                                            disabled={loading || !formData.category || !formData.subject || !formData.description}
+                                            disabled={loading || !formData.category || !formData.subject || !formData.description || (formData.category === 'attendance' && !formData.attendanceDate)}
                                             className="w-full bg-blue-600 hover:bg-blue-700 text-white h-14"
                                         >
                                             {loading ? (
@@ -217,7 +268,7 @@ export default function SupportPage() {
                             <CardContent className="space-y-4">
                                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                     <h4 className="font-medium text-yellow-800 mb-1">Forgot to Check In</h4>
-                                    <p className="text-sm text-yellow-700">If you forgot to check in but worked, submit a ticket with your actual work hours.</p>
+                                    <p className="text-sm text-yellow-700">If you forgot to check in but worked, select the date and submit a ticket with your actual work hours.</p>
                                 </div>
                                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                     <h4 className="font-medium text-blue-800 mb-1">Timer Issues</h4>
@@ -281,6 +332,10 @@ export default function SupportPage() {
                                     <li className="flex items-start gap-2">
                                         <span className="text-green-500 mt-1">•</span>
                                         Provide exact times if reporting time tracking issues
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-green-500 mt-1">•</span>
+                                        For attendance issues, select the correct date
                                     </li>
                                 </ul>
                             </CardContent>

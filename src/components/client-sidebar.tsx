@@ -1,6 +1,6 @@
 "use client"
 
-import { IconDashboard, IconReport, IconTimeline, IconUsers } from "@tabler/icons-react"
+import { IconDashboard, IconReport, IconTimeline, IconUsers,IconLock } from "@tabler/icons-react"
 import { NavMain } from "@/components/nav-main"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 
@@ -10,6 +10,7 @@ export function ClientSidebar(props: React.ComponentProps<typeof Sidebar>) {
     { title: "Workers", url: "/client", icon: IconUsers },
     { title: "EOD Reports", url: "/client/reports", icon: IconReport },
     { title: "Time Analytics", url: "/client/analytics", icon: IconTimeline },
+    { title: "Change Password", url: "/client/change-password", icon: IconLock },
   ]
 
   return (

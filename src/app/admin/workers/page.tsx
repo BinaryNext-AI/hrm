@@ -6,11 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Users, 
   UserPlus, 
   Mail, 
-  Calendar, 
+  Calendar,
+  Trash2, 
   UserCheck, 
   Plus,
   Loader2
@@ -23,8 +25,10 @@ export default function WorkersPage() {
   const [items, setItems] = useState<Array<{id:number,email:string,role:string,created_at?:string}>>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedWorkers, setSelectedWorkers] = useState<number[]>([]);
 
   async function load() {
     setLoading(true);
@@ -64,6 +68,61 @@ export default function WorkersPage() {
       setCreating(false);
     }
   }
+  
+  async function deleteSelectedWorkers() {
+    if (selectedWorkers.length === 0) {
+      toast.error("Please select at least one worker to delete");
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      // Find emails for selected worker IDs
+      const workersToDelete = items.filter(worker => selectedWorkers.includes(worker.id));
+      
+      // Delete each selected worker
+      const deletePromises = workersToDelete.map(worker =>
+        fetch(`${API_BASE}/admin/delete_worker?email=${encodeURIComponent(worker.email)}`, {
+          method: "DELETE",
+        }).then(res => res.json())
+      );
+
+      const results = await Promise.all(deletePromises);
+      
+      const successCount = results.filter(data => data?.ok).length;
+      const failCount = results.length - successCount;
+
+      if (successCount > 0) {
+        toast.success(`${successCount} worker(s) deleted successfully!`);
+        setSelectedWorkers([]); // Clear selection
+        await load(); // Refresh list
+      }
+      
+      if (failCount > 0) {
+        toast.error(`Failed to delete ${failCount} worker(s)`);
+      }
+    } catch (error) {
+      toast.error("An error occurred while deleting workers");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  function toggleWorkerSelection(workerId: number) {
+    setSelectedWorkers(prev => 
+      prev.includes(workerId) 
+        ? prev.filter(id => id !== workerId)
+        : [...prev, workerId]
+    );
+  }
+
+  function toggleSelectAll() {
+    if (selectedWorkers.length === items.length) {
+      setSelectedWorkers([]);
+    } else {
+      setSelectedWorkers(items.map(worker => worker.id));
+    }
+  }
 
   if (loading) {
     return (
@@ -87,14 +146,40 @@ export default function WorkersPage() {
       {/* Stats Card */}
       <Card className="border-0 shadow-lg bg-white mb-8">
         <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-green-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <Users className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Total Workers</h3>
+                <p className="text-3xl font-bold text-green-600">{items.length}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Total Workers</h3>
-              <p className="text-3xl font-bold text-green-600">{items.length}</p>
-            </div>
+            {selectedWorkers.length > 0 && (
+              <div className="flex items-center gap-4">
+                <Badge className="bg-blue-100 text-blue-800 text-sm px-3 py-1">
+                  {selectedWorkers.length} selected
+                </Badge>
+                <Button
+                  onClick={deleteSelectedWorkers}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Selected ({selectedWorkers.length})
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -156,14 +241,50 @@ export default function WorkersPage() {
         </CardContent>
       </Card>
 
-      {/* Workers List */}
+      {/* Workers List with Selection */}
+      {items.length > 0 && (
+        <Card className="border-0 shadow-lg bg-white mb-4">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-slate-600" />
+                All Workers
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="select-all"
+                  checked={selectedWorkers.length === items.length && items.length > 0}
+                  onCheckedChange={toggleSelectAll}
+                />
+                <Label htmlFor="select-all" className="cursor-pointer text-sm font-normal">
+                  Select All
+                </Label>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((worker) => (
-          <Card key={worker.id} className="border-0 shadow-lg bg-white hover:shadow-xl transition-shadow">
+          <Card 
+            key={worker.id} 
+            className={`border-0 shadow-lg bg-white hover:shadow-xl transition-all cursor-pointer ${
+              selectedWorkers.includes(worker.id) ? 'ring-2 ring-blue-500' : ''
+            }`}
+            onClick={() => toggleWorkerSelection(worker.id)}
+          >
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <UserCheck className="h-5 w-5 text-green-600" />
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedWorkers.includes(worker.id)}
+                    onCheckedChange={() => toggleWorkerSelection(worker.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                    <UserCheck className="h-5 w-5 text-green-600" />
+                  </div>
                 </div>
                 <Badge className="bg-green-100 text-green-800">Active</Badge>
               </div>
@@ -213,5 +334,3 @@ export default function WorkersPage() {
     </div>
   );
 }
-
-

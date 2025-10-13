@@ -20,7 +20,8 @@ import {
     Tag,
     Send,
     Shield,
-    Reply
+    Reply,
+    CalendarCheck
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
@@ -36,6 +37,7 @@ interface SupportTicket {
     priority: string;
     status: string;
     admin_response: string | null;
+    attendance_date: string | null;
     created_at: string;
     updated_at: string;
 }
@@ -155,7 +157,6 @@ export default function AdminSupportPage() {
         
         setSendingMessage(true);
         try {
-            // For admin, we'll use a hardcoded admin ID (1) since we don't have admin login yet
             const adminId = 1;
 
             const params = new URLSearchParams({
@@ -221,6 +222,16 @@ export default function AdminSupportPage() {
             case 'general': return <MessageSquare className="h-4 w-4" />;
             default: return <MessageSquare className="h-4 w-4" />;
         }
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
     };
 
     const filteredTickets = tickets.filter(ticket => {
@@ -372,7 +383,7 @@ export default function AdminSupportPage() {
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-2">
+                                                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                                                         {getCategoryIcon(ticket.category)}
                                                         <h4 className="font-medium text-slate-900">{ticket.subject}</h4>
                                                         <Badge className={getPriorityColor(ticket.priority)}>
@@ -381,8 +392,14 @@ export default function AdminSupportPage() {
                                                         <Badge className={getStatusColor(ticket.status)}>
                                                             {ticket.status.replace('_', ' ')}
                                                         </Badge>
+                                                        {ticket.attendance_date && (
+                                                            <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                                                                <CalendarCheck className="h-3 w-3 mr-1" />
+                                                                {formatDate(ticket.attendance_date)}
+                                                            </Badge>
+                                                        )}
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-sm text-slate-500">
+                                                    <div className="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
                                                         <div className="flex items-center gap-1">
                                                             <Mail className="h-4 w-4" />
                                                             {ticket.worker_email}
@@ -405,7 +422,7 @@ export default function AdminSupportPage() {
                 {/* Conversation Thread */}
                 <div>
                     {selectedTicket ? (
-                        <Card className="border-0 shadow-lg bg-white h-[600px] flex flex-col">
+                       <Card className="border-0 shadow-lg bg-white max-h-[700px] flex flex-col overflow-hidden">
                             <CardHeader className="border-b border-slate-200">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -417,7 +434,7 @@ export default function AdminSupportPage() {
                                             {selectedTicket.worker_email} • {new Date(selectedTicket.created_at).toLocaleString()}
                                         </CardDescription>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 flex-wrap">
                                         <Badge className={getPriorityColor(selectedTicket.priority)}>
                                             {selectedTicket.priority}
                                         </Badge>
@@ -427,6 +444,21 @@ export default function AdminSupportPage() {
                                     </div>
                                 </div>
                                 
+                                {/* Attendance Date Display */}
+                                {selectedTicket.attendance_date && (
+                                    <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                            <CalendarCheck className="h-4 w-4 text-purple-600" />
+                                            <div>
+                                                <p className="text-xs font-medium text-purple-900">Attendance Date</p>
+                                                <p className="text-sm text-purple-700 font-semibold">
+                                                    {formatDate(selectedTicket.attendance_date)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Status Actions */}
                                 <div className="mt-4">
                                     <h4 className="text-sm font-medium text-slate-900 mb-2">Update Status</h4>
@@ -446,7 +478,7 @@ export default function AdminSupportPage() {
                                 </div>
                             </CardHeader>
                             
-                            <CardContent className="flex-1 flex flex-col p-0">
+                            <CardContent className="flex-1 flex flex-col p-0 overflow-y-auto">
                                 {/* Original Ticket Description */}
                                 <div className="p-4 border-b border-slate-200 bg-slate-50">
                                     <div className="flex items-start gap-3">
@@ -529,6 +561,7 @@ export default function AdminSupportPage() {
                                 </div>
 
                                 {/* Reply Form */}
+                                
                                 <div className="border-t border-slate-200 p-4">
                                     <div className="flex gap-2">
                                         <Textarea

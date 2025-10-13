@@ -6,8 +6,8 @@ import {
   IconReport,
   IconClock,
   IconUser,
-  IconInnerShadowTop,
   IconHelp,
+  IconLock,
 } from "@tabler/icons-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -28,6 +28,8 @@ const data = {
     { title: "End of Day Report", url: "/hire/reports/eod", icon: IconReport },
     { title: "Support", url: "/hire/support", icon: IconHelp },
     { title: "My Tickets", url: "/hire/tickets", icon: IconReport },
+    // 👇 New Change Password link
+    { title: "Change Password", url: "/hire/change-password", icon: IconLock },
   ],
 }
 
@@ -49,9 +51,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
         <NavMain items={data.navMain} />
       </SidebarContent>
+
       <SidebarFooter />
     </Sidebar>
   )

@@ -246,104 +246,73 @@ export default function HirePage() {
                     </Card>
                 </div>
 
-                {/* Daily Check-in/Check-out - Only show if not fully completed */}
-                {!(today?.check_in && today?.check_out) && (
-                    <Card className="border-0 shadow-lg bg-white">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <User className="h-5 w-5 text-slate-600" />
-                                Daily Attendance
-                            </CardTitle>
-                            <CardDescription>Check in and out for your work day</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                    <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
-                                        <Calendar className="h-6 w-6 text-slate-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-slate-900">Today's Status</h3>
-                                        <p className="text-sm text-slate-600">
-                                            {today?.check_in ? `Checked in at ${today.check_in}` : "Not checked in"}
-                                            {today?.check_out ? ` • Checked out at ${today.check_out}` : ""}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={async ()=>{
-                                            const id = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-                                            if (!id) return;
-                                            const res = await fetch(`${API_BASE}/time/check-in?worker_id=${id}`, { method: 'POST' });
-                                            const d = await res.json(); 
-                                            if (d?.ok !== false) { 
-                                                toast.success('Checked in successfully'); 
-                                                load(); 
-                                            }
-                                        }}
-                                        disabled={!!today?.check_in}
-                                        className={`border-green-200 text-green-700 hover:bg-green-50 ${
-                                            today?.check_in ? 'opacity-50 cursor-not-allowed' : ''
-                                        }`}
-                                    >
-                                        <User className="h-4 w-4 mr-2" />
-                                        {today?.check_in ? 'Already Checked In' : 'Check In'}
-                                    </Button>
-                                    <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={async ()=>{
-                                            const id = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-                                            if (!id) return;
-                                            const res = await fetch(`${API_BASE}/time/check-out?worker_id=${id}`, { method: 'POST' });
-                                            const d = await res.json(); 
-                                            if (d?.ok !== false) { 
-                                                toast.success('Checked out successfully'); 
-                                                load(); 
-                                            }
-                                        }}
-                                        disabled={!today?.check_in || !!today?.check_out}
-                                        className={`border-red-200 text-red-700 hover:bg-red-50 ${
-                                            !today?.check_in || today?.check_out ? 'opacity-50 cursor-not-allowed' : ''
-                                        }`}
-                                    >
-                                        <User className="h-4 w-4 mr-2" />
-                                        {today?.check_out ? 'Already Checked Out' : !today?.check_in ? 'Check In First' : 'Check Out'}
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
 
-                {/* Daily Attendance Summary - Show when fully completed */}
-                {today?.check_in && today?.check_out && (
-                    <Card className="border-0 shadow-lg bg-white border-l-4 border-l-green-500">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
+                {/* Daily Attendance Summary - Show status */}
+                <Card className={`border-0 shadow-lg bg-white ${today?.check_in ? 'border-l-4 border-l-green-500' : ''}`}>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            {today?.check_in && today?.check_out ? (
                                 <CheckCircle className="h-5 w-5 text-green-600" />
-                                Daily Attendance Complete
-                            </CardTitle>
-                            <CardDescription>You have completed your daily check-in and check-out</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center space-x-4">
-                                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                            ) : (
+                                <User className="h-5 w-5 text-slate-600" />
+                            )}
+                            Daily Attendance
+                        </CardTitle>
+                        <CardDescription>
+                            {today?.check_in && today?.check_out 
+                                ? "You have completed your daily check-in and check-out" 
+                                : "Start the timer below to automatically check in"}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center space-x-4">
+                            <div className={`h-12 w-12 rounded-full flex items-center justify-center ${
+                                today?.check_in && today?.check_out ? 'bg-green-100' : 'bg-slate-100'
+                            }`}>
+                                {today?.check_in && today?.check_out ? (
                                     <CheckCircle className="h-6 w-6 text-green-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-slate-900">Work Day Complete</h3>
-                                    <p className="text-sm text-slate-600">
-                                        Checked in at {today.check_in} • Checked out at {today.check_out}
-                                    </p>
-                                </div>
+                                ) : (
+                                    <Calendar className="h-6 w-6 text-slate-600" />
+                                )}
                             </div>
-                        </CardContent>
-                    </Card>
-                )}
+                            <div className="flex-1">
+                                <h3 className="font-semibold text-slate-900">
+                                    {today?.check_in && today?.check_out ? 'Work Day Complete' : "Today's Status"}
+                                </h3>
+                                <p className="text-sm text-slate-600">
+                                    {today?.check_in ? `Checked in at ${today.check_in}` : "Not checked in yet"}
+                                    {today?.check_out ? ` • Checked out at ${today.check_out}` : ""}
+                                </p>
+                                {!today?.check_in && (
+                                    <p className="text-xs text-blue-600 mt-1">
+                                        💡 Tip: Check-in will happen automatically when you start the timer below
+                                    </p>
+                                )}
+                            </div>
+                            {/* Manual Check-out Button - Only show if checked in but not checked out */}
+                            {today?.check_in && !today?.check_out && (
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={async ()=>{
+                                        const id = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
+                                        if (!id) return;
+                                        const res = await fetch(`${API_BASE}/time/check-out?worker_id=${id}`, { method: 'POST' });
+                                        const d = await res.json(); 
+                                        if (d?.ok !== false) { 
+                                            toast.success('Checked out successfully'); 
+                                            load(); 
+                                        }
+                                    }}
+                                    className="border-red-200 text-red-700 hover:bg-red-50"
+                                >
+                                    <User className="h-4 w-4 mr-2" />
+                                    Check Out
+                                </Button>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
 
                 {/* Global Time Tracking */}
                 <Card className="border-0 shadow-lg bg-white">
@@ -352,7 +321,12 @@ export default function HirePage() {
                             <Clock className="h-5 w-5 text-slate-600" />
                             Daily Time Tracking
                         </CardTitle>
-                        <CardDescription>Track your 8-hour work day with automatic time recording</CardDescription>
+                        <CardDescription>
+                            Track your 8-hour work day with automatic time recording
+                            {!today?.check_in && (
+                                <span className="text-blue-600 font-medium"> • Starting timer will check you in automatically</span>
+                            )}
+                        </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-between">
@@ -395,13 +369,21 @@ export default function HirePage() {
                                                 setGlobalActive(true); 
                                                 setGlobalStartedAt(Date.now()); 
                                                 setGlobalElapsed(globalBaseElapsed); 
-                                                toast.success('Tracking resumed'); 
+                                                
+                                                // Show appropriate message based on check-in status
+                                                if (!today?.check_in) {
+                                                    toast.success('Checked in and tracking started!'); 
+                                                } else {
+                                                    toast.success('Tracking resumed'); 
+                                                }
+                                                
+                                                load(); // Reload to update check-in status
                                             }
                                         }}
                                         className="bg-green-600 hover:bg-green-700 text-white"
                                     >
                                         <Play className="h-4 w-4 mr-2" />
-                                        Resume
+                                        {!today?.check_in ? 'Start & Check In' : 'Resume'}
                                     </Button>
                                 ) : (
                                     <Button 
