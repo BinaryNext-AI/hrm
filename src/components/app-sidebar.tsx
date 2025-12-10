@@ -20,6 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import LogoutButton from "@/components/LogoutButton"
 
 const data = {
   navMain: [
@@ -56,7 +57,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
 
-      <SidebarFooter />
+      <SidebarFooter className="p-2">
+        <LogoutButton variant="ghost" size="sm" className="w-full justify-start" />
+      </SidebarFooter>
     </Sidebar>
   )
 }

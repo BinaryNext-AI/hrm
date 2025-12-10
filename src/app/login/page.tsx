@@ -13,8 +13,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
 export default function LoginPage() {
 	const router = useRouter();
-	const [email, setEmail] = useState("awais53562@gmail.com");
-	const [password, setPassword] = useState("Awais@123");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -94,11 +94,19 @@ export default function LoginPage() {
 							{loading ? <Spinner /> : "Sign in"}
 						</Button>
 					</form>
-					<div className="mt-4 text-center text-sm">
-						<span className="text-gray-600">No account? </span>
-						<Link href="/signup" className="text-blue-600 hover:text-blue-500 font-medium">
-							Create one
-						</Link>
+					<div className="mt-4 text-center text-sm space-y-2">
+						<div>
+							<span className="text-gray-600">No account? </span>
+							<Link href="/signup" className="text-blue-600 hover:text-blue-500 font-medium">
+								Create one
+							</Link>
+						</div>
+						<div>
+							<span className="text-gray-600">Are you a client? </span>
+							<Link href="/recruiter-signup" className="text-green-600 hover:text-green-500 font-medium">
+								Sign up here
+							</Link>
+						</div>
 					</div>
 				</CardContent>
 			</Card>

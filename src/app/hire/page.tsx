@@ -76,6 +76,67 @@ export default function HirePage() {
 
     useEffect(() => { load(); }, []);
 
+    // Cleanup function to stop tracking when component unmounts or user navigates away
+    useEffect(() => {
+        const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+            if (globalActive || activeTaskId) {
+                // Stop active sessions before page unload
+                const id = localStorage.getItem('user_id');
+                if (id) {
+                    if (globalActive) {
+                        navigator.sendBeacon(`${API_BASE}/time/global/stop?worker_id=${id}`, '');
+                    }
+                    if (activeTaskId) {
+                        const params = new URLSearchParams({ 
+                            worker_id: id, 
+                            task_id: String(activeTaskId),
+                            keystrokes: String(keyCount),
+                            mouse_clicks: String(clickCount),
+                            mouse_moves: String(moveCount)
+                        });
+                        navigator.sendBeacon(`${API_BASE}/time/task/stop?${params.toString()}`, '');
+                    }
+                }
+            }
+        };
+
+        const handleVisibilityChange = async () => {
+            if (document.hidden && (globalActive || activeTaskId)) {
+                // Page is being hidden, stop active sessions
+                const id = localStorage.getItem('user_id');
+                if (id) {
+                    try {
+                        if (globalActive) {
+                            await fetch(`${API_BASE}/time/global/stop?worker_id=${id}`, { method: 'POST' });
+                            setGlobalActive(false);
+                        }
+                        if (activeTaskId) {
+                            const params = new URLSearchParams({ 
+                                worker_id: id, 
+                                task_id: String(activeTaskId),
+                                keystrokes: String(keyCount),
+                                mouse_clicks: String(clickCount),
+                                mouse_moves: String(moveCount)
+                            });
+                            await fetch(`${API_BASE}/time/task/stop?${params.toString()}`, { method: 'POST' });
+                            setActiveTaskId(null);
+                        }
+                    } catch (error) {
+                        console.log('Failed to stop sessions on visibility change:', error);
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [globalActive, activeTaskId, keyCount, clickCount, moveCount]);
+
     // Load global elapsed on mount
     useEffect(() => {
         (async () => {
@@ -193,7 +254,7 @@ export default function HirePage() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-900">Worker Dashboard</h1>
+                        <h1 className="text-3xl font-bold text-slate-900">Employee Dashboard</h1>
                         <p className="text-slate-600 mt-1">Track your tasks, time, and daily progress</p>
                     </div>
                     <LogoutButton />
@@ -363,7 +424,7 @@ export default function HirePage() {
                                         onClick={async ()=>{
                                             const id = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
                                             if (!id) return;
-                                            const res = await fetch(`${API_BASE}/time/global/start?worker_id=${id}`, { method: 'POST' });
+                                            const res = await fetch(`${API_BASE}/time/global/resume?worker_id=${id}`, { method: 'POST' });
                                             const d = await res.json(); 
                                             if (d?.ok !== false) { 
                                                 setGlobalActive(true); 

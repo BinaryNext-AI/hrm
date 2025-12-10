@@ -37,7 +37,7 @@ export default function SignupPage() {
 		<div className="min-h-screen w-full flex items-center justify-center bg-gray-50 px-4">
 			<div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 				<h1 className="text-2xl font-semibold text-gray-900 text-center">Create account</h1>
-				<p className="text-sm text-gray-500 text-center mt-1">Sign up as a client</p>
+				<p className="text-sm text-gray-500 text-center mt-1">Sign up as a general user</p>
 
 				<form onSubmit={handleSubmit} className="mt-6 space-y-4">
 					<div>
@@ -88,9 +88,10 @@ export default function SignupPage() {
 					</button>
 				</form>
 
-				<p className="text-center text-sm text-gray-600 mt-4">
-					Already have an account? <Link href="/login" className="underline">Sign in</Link>
-				</p>
+				<div className="text-center text-sm text-gray-600 mt-4 space-y-2">
+					<p>Already have an account? <Link href="/login" className="underline">Sign in</Link></p>
+					<p>Are you a client? <Link href="/recruiter-signup" className="text-green-600 underline">Sign up here</Link></p>
+				</div>
 			</div>
 		</div>
 	);

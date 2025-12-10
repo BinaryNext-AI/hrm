@@ -1,8 +1,9 @@
 "use client"
 
-import { IconDashboard, IconReport, IconTimeline, IconUsers,IconLock } from "@tabler/icons-react"
+import { IconDashboard, IconReport, IconTimeline, IconUsers, IconLock } from "@tabler/icons-react"
 import { NavMain } from "@/components/nav-main"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import LogoutButton from "@/components/LogoutButton"
 
 export function ClientSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const items = [
@@ -27,7 +28,9 @@ export function ClientSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={items} />
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter className="p-2">
+        <LogoutButton variant="ghost" size="sm" className="w-full justify-start" />
+      </SidebarFooter>
     </Sidebar>
   )
 }

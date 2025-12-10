@@ -92,7 +92,7 @@ export default function AdminPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-slate-600">Total Recruiters</p>
+                                    <p className="text-sm text-slate-600">Total Clients</p>
                                     <p className="text-3xl font-bold text-slate-900">{stats.recruiters}</p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -106,7 +106,7 @@ export default function AdminPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-slate-600">Total Workers</p>
+                                    <p className="text-sm text-slate-600">Total Employees</p>
                                     <p className="text-3xl font-bold text-slate-900">{stats.workers}</p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -134,7 +134,7 @@ export default function AdminPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-slate-600">Active Workers</p>
+                                    <p className="text-sm text-slate-600">Active Employees</p>
                                     <p className="text-3xl font-bold text-slate-900">{stats.activeWorkers}</p>
                                 </div>
                                 <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
@@ -153,7 +153,7 @@ export default function AdminPage() {
                                 <Shield className="h-5 w-5 text-blue-600" />
                                 User Management
                             </CardTitle>
-                            <CardDescription>Manage recruiters and workers in your system</CardDescription>
+                            <CardDescription>Manage clients and employees in your system</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <Link href="/admin/recruiters">
@@ -163,8 +163,8 @@ export default function AdminPage() {
                                             <Users className="h-5 w-5 text-blue-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-slate-900">Recruiters</h3>
-                                            <p className="text-sm text-slate-600">Create and manage all recruiters</p>
+                                            <h3 className="font-medium text-slate-900">Clients</h3>
+                                            <p className="text-sm text-slate-600">Create and manage all clients</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -181,8 +181,8 @@ export default function AdminPage() {
                                             <UserCheck className="h-5 w-5 text-green-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-medium text-slate-900">Workers</h3>
-                                            <p className="text-sm text-slate-600">Create and manage workers</p>
+                                            <h3 className="font-medium text-slate-900">Employees</h3>
+                                            <p className="text-sm text-slate-600">Create and manage employees</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function AdminPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-medium text-slate-900">Assignments</h3>
-                                            <p className="text-sm text-slate-600">Assign workers to recruiters</p>
+                                            <p className="text-sm text-slate-600">Assign employees to clients</p>
                                         </div>
                                     </div>
                                     <ArrowRight className="h-4 w-4 text-slate-400" />
@@ -226,7 +226,7 @@ export default function AdminPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-medium text-slate-900">Support Tickets</h3>
-                                            <p className="text-sm text-slate-600">Manage worker support requests</p>
+                                            <p className="text-sm text-slate-600">Manage employee support requests</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">

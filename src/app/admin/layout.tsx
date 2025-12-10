@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -15,17 +16,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const nav = [
     { href: "/admin", label: "Overview" },
-    { href: "/admin/recruiters", label: "Recruiters" },
-    { href: "/admin/workers", label: "Workers" },
+    { href: "/admin/recruiters", label: "Clients" },
+    { href: "/admin/workers", label: "Employees" },
     { href: "/admin/assignments", label: "Assignments" },
     { href: "/admin/support", label: "Support Tickets" },
   ];
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <aside className="w-64 hidden md:block border-r border-gray-200 bg-white">
+      <aside className="w-64 hidden md:block border-r border-gray-200 bg-white flex flex-col">
         <div className="px-4 py-4 text-lg font-semibold">Admin</div>
-        <nav className="px-2 py-2 space-y-1">
+        <nav className="px-2 py-2 space-y-1 flex-1">
           {nav.map((i) => (
             <Link
               key={i.href}
@@ -36,6 +37,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+        <div className="p-4 border-t border-gray-200">
+          <LogoutButton variant="ghost" size="sm" className="w-full justify-start" />
+        </div>
       </aside>
       <main className="flex-1 min-w-0">
         {children}

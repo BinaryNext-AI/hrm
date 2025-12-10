@@ -98,9 +98,18 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
-              Log out
+            <DropdownMenuItem asChild>
+              <button
+                onClick={async () => {
+                  const { logout } = await import("@/lib/auth");
+                  await logout();
+                  window.location.href = "/";
+                }}
+                className="w-full flex items-center"
+              >
+                <IconLogout />
+                Log out
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

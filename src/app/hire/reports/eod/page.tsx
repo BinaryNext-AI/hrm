@@ -35,8 +35,13 @@ export default function EodReportPage() {
       const res = await fetch(`${API_BASE}/reports/eod?${params.toString()}`, { method: 'POST' });
       const data = await res.json();
       if (data?.ok !== false) {
-        toast.success("End of day report submitted");
+        toast.success("End of day report submitted - Workday concluded!");
         setAccomplishments(""); setChallenges(""); setBlockers(""); setHours("8"); setNextPlan("");
+        
+        // Show additional success message about checkout
+        setTimeout(() => {
+          toast.success("You have been automatically checked out for the day");
+        }, 1000);
       } else {
         toast.error(data?.detail || "Failed to submit report");
       }
