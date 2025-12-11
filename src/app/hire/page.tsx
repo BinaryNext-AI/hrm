@@ -29,7 +29,7 @@ import {
     RotateCcw
 } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://hrm-be-0h9z.onrender.com";
 
 export default function HirePage() {
     const [tasks, setTasks] = useState<Array<{id:number,title:string,description:string|null,priority:string,due_date:string|null,created_at:string,status:string}>>([]);

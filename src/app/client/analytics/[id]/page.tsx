@@ -12,7 +12,7 @@ import { TimeChart } from "@/components/charts/TimeChart";
 import { ActivityChart } from "@/components/charts/ActivityChart";
 import { CompletionChart } from "@/components/charts/CompletionChart";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://hrm-be-0h9z.onrender.com";
 
 export default function WorkerAnalyticsPage() {
   const params = useParams();

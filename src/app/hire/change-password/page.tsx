@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast"; // or your toast library
 import {   Loader2} from "lucide-react";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "https://hrm-be-0h9z.onrender.com";
 
 export default function ChangePasswordPage() {
   const [newPassword, setNewPassword] = useState("");
